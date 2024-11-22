@@ -8,13 +8,15 @@
     <script type="module" src="script.js"></script>
 </head>
 <body>
-    
-    <h1>Controle de Motores</h1>
-    <button onclick="sendCommand('ligar')">Ligar Motor</button>
-    <button onclick="sendCommand('desligar')">Desligar Motor</button>
-    <button onclick="sendCommand('status')">Atualizar Status</button>
-    <h2>Status:</h2>
-    <div id="status">Aguardando...</div>
+
+    <div class="container">
+        <h1>Controle de Motores</h1>
+        <button onclick="sendCommand('ligar')">Ligar Motor</button>
+        <button onclick="sendCommand('desligar')">Desligar Motor</button>
+        <button onclick="sendCommand('status')">Obter Status</button>
+        <div id="status">Status do motor: Desconhecido</div>
+    </div>
+    <div class="footer">Desenvolvido para ESP32 - Projeto de Motores</div>
     
 </body>
 </html>
