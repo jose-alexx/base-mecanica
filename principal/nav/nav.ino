@@ -1,6 +1,6 @@
 #include <Wire.h>
 #include <Stepper.h>
-#include <MPU6050.h>
+#include <MPU6050.h>  // Agora deve funcionar após a instalação da biblioteca MPU6050
 
 const int stepsPerRevolution = 2048;  // número de passos por revolução
 
@@ -37,8 +37,8 @@ const unsigned long debounceDelay = 200;  // debounce para evitar múltiplos aci
 
 void setup() {
   // Definir a velocidade dos motores
-  myStepper1.setSpeed(5);  // motor 1
-  myStepper2.setSpeed(5);  // motor 2
+  myStepper1.setSpeed(10);  // motor 1
+  myStepper2.setSpeed(10);  // motor 2
 
   // Inicializar a porta serial
   Serial.begin(115200);
