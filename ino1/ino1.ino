@@ -22,6 +22,8 @@ const int stepsPerRevolution = 2048;  // número de passos por revolução
 Stepper myStepper1(stepsPerRevolution, IN1_MOTOR1, IN3_MOTOR1, IN2_MOTOR1, IN4_MOTOR1);
 Stepper myStepper2(stepsPerRevolution, IN1_MOTOR2, IN3_MOTOR2, IN2_MOTOR2, IN4_MOTOR2);
 
+bool motorStatus = false; // Status dos motores (ligado/desligado)
+
 void setup() {
   Serial.begin(115200);
 
@@ -52,11 +54,9 @@ void loop() {
         if (c == '\n') {
           // Verifica o comando recebido e ativa os motores
           if (currentLine.indexOf("GET /motor/on") >= 0) {
-            Serial.println("Ligando motores...");
-            motorControl(true);
+            motorControl(true); // Liga os motores
           } else if (currentLine.indexOf("GET /motor/off") >= 0) {
-            Serial.println("Desligando motores...");
-            motorControl(false);
+            motorControl(false); // Desliga os motores
           }
 
           // Envia a página web ao cliente
@@ -78,8 +78,13 @@ void loop() {
             client.println("</head>");
             client.println("<body>");
             client.println("<h1>Controle de Motores</h1>");
+            // Botões para ligar/desligar os motores
             client.println("<button onclick=\"location.href='/motor/on'\">Ligar Motores</button>");
             client.println("<button onclick=\"location.href='/motor/off'\">Desligar Motores</button>");
+            // Exibe o status dos motores
+            client.print("<h2>Status dos Motores: ");
+            client.print(motorStatus ? "Ligados" : "Desligados");
+            client.println("</h2>");
             client.println("</body>");
             client.println("</html>");
             break;
@@ -96,6 +101,7 @@ void loop() {
 }
 
 void motorControl(bool status) {
+  motorStatus = status;
   if (status) {
     Serial.println("Motores ligados");
 
