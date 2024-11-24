@@ -1,5 +1,7 @@
 #include <WiFi.h>
 #include <Stepper.h>
+#include <Wire.h>
+#include <MPU6050.h>
 
 // Configuração Wi-Fi
 const char* ssid = "ESP32_AP";  // Nome do SSID
@@ -22,6 +24,7 @@ const int stepsPerRevolution = 2048;  // número de passos por revolução
 Stepper myStepper1(stepsPerRevolution, IN1_MOTOR1, IN3_MOTOR1, IN2_MOTOR1, IN4_MOTOR1);
 Stepper myStepper2(stepsPerRevolution, IN1_MOTOR2, IN3_MOTOR2, IN2_MOTOR2, IN4_MOTOR2);
 
+MPU6050 mpu;  // Criação do objeto MPU6050
 bool motorStatus = false; // Status dos motores (ligado/desligado)
 
 void setup() {
@@ -36,6 +39,16 @@ void setup() {
   server.begin();  // Inicia o servidor
   myStepper1.setSpeed(5);  // Define a velocidade do motor
   myStepper2.setSpeed(5);  // Define a velocidade do motor
+
+  // Inicializa o MPU6050
+  Wire.begin();
+  mpu.initialize();
+  if (!mpu.testConnection()) {
+    Serial.println("Falha na conexão com o MPU6050");
+    while (1);
+  } else {
+    Serial.println("MPU6050 conectado!");
+  }
 }
 
 void loop() {
@@ -98,6 +111,27 @@ void loop() {
     client.stop();
     Serial.println("Cliente desconectado");
   }
+
+  // Leitura do MPU6050 e cálculo da inclinação no eixo Z
+  int16_t ax, ay, az;
+  mpu.getAcceleration(&ax, &ay, &az);
+
+  // Converte para ângulo em graus
+  float angleZ = atan2(az, sqrt(ax * ax + ay * ay)) * 180 / PI;
+
+  // Garantir que o ângulo seja positivo (valor absoluto)
+  angleZ = fabs(angleZ);
+
+  // Leitura da temperatura do MPU6050 (em graus Celsius)
+  float temperature = mpu.getTemperature() / 340.0 + 36.53;
+
+  // Exibe o valor do ângulo Z e a temperatura no monitor serial
+  Serial.print("Ângulo no eixo Z: ");
+  Serial.println(angleZ);
+  Serial.print("Temperatura: ");
+  Serial.println(temperature);  // Temperatura em °C
+
+  delay(100);  // Atualiza a cada 100 ms
 }
 
 void motorControl(bool status) {
