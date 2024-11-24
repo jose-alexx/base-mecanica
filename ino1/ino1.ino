@@ -9,15 +9,15 @@ WiFiServer server(80);  // Servidor na porta 80
 
 // Motor de Passo
 const int stepsPerRevolution = 2048;  // número de passos por revolução
-#define IN1_MOTOR1 19
-#define IN2_MOTOR1 18
-#define IN3_MOTOR1 5
-#define IN4_MOTOR1 17
+#define IN1_MOTOR1 18
+#define IN2_MOTOR1 5
+#define IN3_MOTOR1 17
+#define IN4_MOTOR1 16
 
-#define IN1_MOTOR2 16
+#define IN1_MOTOR2 4
 #define IN2_MOTOR2 0
-#define IN3_MOTOR2 4
-#define IN4_MOTOR2 2
+#define IN3_MOTOR2 2
+#define IN4_MOTOR2 15
 
 Stepper myStepper1(stepsPerRevolution, IN1_MOTOR1, IN3_MOTOR1, IN2_MOTOR1, IN4_MOTOR1);
 Stepper myStepper2(stepsPerRevolution, IN1_MOTOR2, IN3_MOTOR2, IN2_MOTOR2, IN4_MOTOR2);
