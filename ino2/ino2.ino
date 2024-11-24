@@ -1,6 +1,6 @@
 #include <WiFi.h>
 
-// Defina as credenciais do Wi-Fi do ponto de acesso do servidor
+// Credenciais Wi-Fi do ponto de acesso do servidor
 const char* ssid = "ESP32_AP";         // SSID do ponto de acesso do servidor
 const char* password = "12345678";     // Senha do Wi-Fi
 
@@ -34,10 +34,13 @@ void loop() {
     if (client.connect("192.168.4.1", 80)) {  // IP do servidor (alterar conforme necessário)
       Serial.println("Conectado ao servidor!");
 
-      // Envia um comando ao servidor para ativar os motores
-      client.println("MOTOR_ON");
-      delay(500);  // Delay para garantir que o comando seja enviado
+      // Envia o comando como uma requisição HTTP GET
+      client.println("GET /motor/on HTTP/1.1");
+      client.println("Host: 192.168.4.1");
+      client.println("Connection: close");
+      client.println();  // Linha em branco para finalizar a requisição
 
+      delay(500);  // Delay para garantir que o comando seja enviado
       client.stop();  // Desconecta do servidor
     } else {
       Serial.println("Falha ao conectar ao servidor");
@@ -45,5 +48,3 @@ void loop() {
   }
   delay(100);  // Pequeno atraso para evitar leituras rápidas demais
 }
-
-
