@@ -29,6 +29,7 @@ bool motorStatus = false;
 bool invertDirection = false;  // Flag para inverter direção
 
 const int buzzerPin = 2;  // Pino do buzzer
+const int ledPin = 12;    // Pino do LED verde
 
 void setup() {
   Serial.begin(115200);
@@ -42,6 +43,7 @@ void setup() {
   myStepper2.setSpeed(5);
 
   pinMode(buzzerPin, OUTPUT);  // Configura o pino do buzzer
+  pinMode(ledPin, OUTPUT);     // Configura o pino do LED
 
   Wire.begin();
   mpu.initialize();
@@ -105,14 +107,16 @@ void motorControl(bool status) {
   motorStatus = status;
   if (status) {
     Serial.println("Motores ligados");
+    digitalWrite(ledPin, HIGH);  // Acende o LED verde
     for (int i = 0; i < 100; i++) {
       // Controla a direção com base na variável invertDirection
       myStepper1.step(invertDirection ? -1 : 1);  
       myStepper2.step(invertDirection ? 1 : -1);   
-         delay(10);
+      delay(10);
     }
   } else {
     Serial.println("Motores desligados");
+    digitalWrite(ledPin, LOW);   // Apaga o LED verde
   }
 }
 
