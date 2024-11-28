@@ -28,6 +28,8 @@ MPU6050 mpu;
 bool motorStatus = false;
 bool invertDirection = false;  // Flag para inverter direção
 
+const int buzzerPin = 2;  // Pino do buzzer
+
 void setup() {
   Serial.begin(115200);
   WiFi.softAP(ssid, password);
@@ -38,6 +40,8 @@ void setup() {
   server.begin();
   myStepper1.setSpeed(5);
   myStepper2.setSpeed(5);
+
+  pinMode(buzzerPin, OUTPUT);  // Configura o pino do buzzer
 
   Wire.begin();
   mpu.initialize();
@@ -59,6 +63,7 @@ void loop() {
       if (client.available()) {
         char c = client.read();
         Serial.write(c);  
+
         if (c == '\n') {
           // Comandos recebidos
           if (currentLine.indexOf("GET /motor/on") >= 0) {
@@ -68,6 +73,7 @@ void loop() {
           } else if (currentLine.indexOf("GET /motor/invert") >= 0) {
             invertDirection = !invertDirection;  // Inverte a direção
             motorControl(true); // Religa os motores após inverter
+            soundBuzzer();      // Emite o som do buzzer
           }
 
           // Envia a página HTML ao cliente
@@ -78,7 +84,7 @@ void loop() {
             client.println("<!DOCTYPE html><html><head><title>Controle de Motores</title></head><body>");
             client.println("<button onclick=\"location.href='/motor/on'\">Ligar Motores</button>");
             client.println("<button onclick=\"location.href='/motor/off'\">Desligar Motores</button>");
-            client.println("<button onclick=\"location.href='/motor/invert'\">Inverter Rotacao</button>");
+            client.println("<button onclick=\"location.href='/motor/invert'\">Inverter Rotação</button>");
             client.println("<h2>Status dos Motores: " + String(motorStatus ? "Ligados" : "Desligados") + "</h2>");
             client.println("</body></html>");
             break;
@@ -103,9 +109,14 @@ void motorControl(bool status) {
       // Controla a direção com base na variável invertDirection
       myStepper1.step(invertDirection ? -1 : 1);  
       myStepper2.step(invertDirection ? 1 : -1);   
-      delay(10);
+         delay(10);
     }
   } else {
     Serial.println("Motores desligados");
   }
 }
+
+void soundBuzzer() {
+  tone(buzzerPin, 1000, 500);  // Toca o buzzer a 1000 Hz por 500 ms
+}
+
