@@ -68,13 +68,11 @@ void loop() {
 
       delay(500);  // Delay para garantir que o comando seja enviado
       client.stop();  // Desconecta do servidor
-
-      // Emite um som no buzzer para indicar que a rotação foi invertida
-      tone(buzzerPin, 1000, 500);  // Toca o buzzer a 1000 Hz por 500 ms
     } else {
       Serial.println("Falha ao conectar ao servidor");
     }
   }
 
-  delay(100);  // Pequeno atraso para evitar leituras rápidas demais
+  delay(100);  // Delay para evitar leituras excessivas
 }
+

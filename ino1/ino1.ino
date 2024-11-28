@@ -30,6 +30,7 @@ bool invertDirection = false;  // Flag para inverter direção
 
 const int buzzerPin = 2;  // Pino do buzzer
 const int ledPin = 12;    // Pino do LED verde
+const int ledRedPin = 14; // Pino do LED vermelho
 
 void setup() {
   Serial.begin(115200);
@@ -43,7 +44,8 @@ void setup() {
   myStepper2.setSpeed(5);
 
   pinMode(buzzerPin, OUTPUT);  // Configura o pino do buzzer
-  pinMode(ledPin, OUTPUT);     // Configura o pino do LED
+  pinMode(ledPin, OUTPUT);     // Configura o pino do LED verde
+  pinMode(ledRedPin, OUTPUT);  // Configura o pino do LED vermelho
 
   Wire.begin();
   mpu.initialize();
@@ -69,10 +71,13 @@ void loop() {
         if (c == '\n') {
           // Comandos recebidos
           if (currentLine.indexOf("GET /motor/on") >= 0) {
+            Serial.println("Comando: Ligar motores");
             motorControl(true);  // Liga os motores
           } else if (currentLine.indexOf("GET /motor/off") >= 0) {
+            Serial.println("Comando: Desligar motores");
             motorControl(false); // Desliga os motores
           } else if (currentLine.indexOf("GET /motor/invert") >= 0) {
+            Serial.println("Comando: Inverter rotação");
             invertDirection = !invertDirection;  // Inverte a direção
             motorControl(true); // Religa os motores após inverter
             soundBuzzer();      // Emite o som do buzzer
@@ -122,5 +127,13 @@ void motorControl(bool status) {
 
 void soundBuzzer() {
   tone(buzzerPin, 1000, 500);  // Toca o buzzer a 1000 Hz por 500 ms
+
+  // Faz o LED vermelho piscar enquanto o buzzer toca
+  for (int i = 0; i < 5; i++) {  // Pisca 5 vezes
+    digitalWrite(ledRedPin, HIGH);  // Acende o LED vermelho
+    delay(100);                     // Aguarda 100ms
+    digitalWrite(ledRedPin, LOW);   // Apaga o LED vermelho
+    delay(100);                     // Aguarda 100ms
+  }
 }
 
