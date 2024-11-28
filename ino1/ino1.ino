@@ -86,14 +86,31 @@ void loop() {
           // Envia a página HTML ao cliente
           if (currentLine.length() == 0) {
             client.println("HTTP/1.1 200 OK");
-            client.println("Content-type:text/html");
-            client.println();
-            client.println("<!DOCTYPE html><html><head><title>Controle de Motores</title></head><body>");
-            client.println("<button onclick=\"location.href='/motor/on'\">Ligar Motores</button>");
-            client.println("<button onclick=\"location.href='/motor/off'\">Desligar Motores</button>");
-            client.println("<button onclick=\"location.href='/motor/invert'\">Inverter Rotação</button>");
-            client.println("<h2>Status dos Motores: " + String(motorStatus ? "Ligados" : "Desligados") + "</h2>");
-            client.println("</body></html>");
+client.println("Content-type:text/html");
+client.println();
+client.println("<!DOCTYPE html>");
+client.println("<html>");
+client.println("<head>");
+client.println("<meta name='viewport' content='width=device-width, initial-scale=1.0'>");  // Torna a página responsiva
+client.println("<title>Controle de Motores</title>");
+client.println("<style>");
+client.println("body { font-family: Arial, sans-serif; text-align: center; padding: 20px; background-color: #f4f4f4; }");
+client.println("button { font-size: 18px; padding: 15px 30px; margin: 10px; border: none; border-radius: 5px; background-color: #4CAF50; color: white; cursor: pointer; width: 80%; }");
+client.println("button:hover { background-color: #45a049; }");
+client.println("h2 { font-size: 24px; color: #333; }");
+client.println("@media (min-width: 600px) {");
+client.println("  button { width: 200px; }");
+client.println("}");
+client.println("</style>");
+client.println("</head>");
+client.println("<body>");
+client.println("<h1>Controle de Motores</h1>");
+client.println("<button onclick=\"location.href='/motor/on'\">Ligar Motores</button>");
+client.println("<button onclick=\"location.href='/motor/off'\">Desligar Motores</button>");
+client.println("<button onclick=\"location.href='/motor/invert'\">Inverter Rotação</button>");
+client.println("<h2>Status dos Motores: " + String(motorStatus ? "Ligados" : "Desligados") + "</h2>");
+client.println("</body>");
+client.println("</html>");
             break;
           }
           currentLine = "";
