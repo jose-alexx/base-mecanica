@@ -4,13 +4,13 @@
 #include <MPU6050.h>
 
 // Configuração Wi-Fi
-const char* ssid = "ESP32_AP";  // Nome do SSID
-const char* password = "12345678";  // Senha do ponto de acesso
+const char* ssid = "ESP32_AP";  
+const char* password = "12345678";  
 
-WiFiServer server(80);  // Servidor na porta 80
+WiFiServer server(80);  
 
 // Motor de Passo
-const int stepsPerRevolution = 2048;  // número de passos por revolução
+const int stepsPerRevolution = 2048;
 #define IN1_MOTOR1 19
 #define IN2_MOTOR1 18
 #define IN3_MOTOR1 5
@@ -24,23 +24,21 @@ const int stepsPerRevolution = 2048;  // número de passos por revolução
 Stepper myStepper1(stepsPerRevolution, IN1_MOTOR1, IN3_MOTOR1, IN2_MOTOR1, IN4_MOTOR1);
 Stepper myStepper2(stepsPerRevolution, IN1_MOTOR2, IN3_MOTOR2, IN2_MOTOR2, IN4_MOTOR2);
 
-MPU6050 mpu;  // Criação do objeto MPU6050
-bool motorStatus = false; // Status dos motores (ligado/desligado)
+MPU6050 mpu;  
+bool motorStatus = false;
+bool invertDirection = false;  // Flag para inverter direção
 
 void setup() {
   Serial.begin(115200);
-
-  // Configura o ponto de acesso Wi-Fi
   WiFi.softAP(ssid, password);
   Serial.println("Ponto de acesso criado");
   Serial.print("IP do servidor: ");
   Serial.println(WiFi.softAPIP());
 
-  server.begin();  // Inicia o servidor
-  myStepper1.setSpeed(5);  // Define a velocidade do motor
-  myStepper2.setSpeed(5);  // Define a velocidade do motor
+  server.begin();
+  myStepper1.setSpeed(5);
+  myStepper2.setSpeed(5);
 
-  // Inicializa o MPU6050
   Wire.begin();
   mpu.initialize();
   if (!mpu.testConnection()) {
@@ -52,54 +50,37 @@ void setup() {
 }
 
 void loop() {
-  // Processa solicitações do cliente (página web ou ESP32 Cliente)
   WiFiClient client = server.available();
-
   if (client) {
     Serial.println("Novo cliente conectado");
-    String currentLine = "";  // Para armazenar os dados recebidos
+    String currentLine = "";  
 
     while (client.connected()) {
       if (client.available()) {
         char c = client.read();
-        Serial.write(c);  // Imprime no monitor serial os dados recebidos
-
+        Serial.write(c);  
         if (c == '\n') {
-          // Verifica o comando recebido e ativa os motores
+          // Comandos recebidos
           if (currentLine.indexOf("GET /motor/on") >= 0) {
-            motorControl(true); // Liga os motores
+            motorControl(true);  // Liga os motores
           } else if (currentLine.indexOf("GET /motor/off") >= 0) {
             motorControl(false); // Desliga os motores
+          } else if (currentLine.indexOf("GET /motor/invert") >= 0) {
+            invertDirection = !invertDirection;  // Inverte a direção
+            motorControl(true); // Religa os motores após inverter
           }
 
-          // Envia a página web ao cliente
+          // Envia a página HTML ao cliente
           if (currentLine.length() == 0) {
             client.println("HTTP/1.1 200 OK");
             client.println("Content-type:text/html");
             client.println();
-
-            // Página HTML com botões para controle
-            client.println("<!DOCTYPE html>");
-            client.println("<html>");
-            client.println("<head>");
-            client.println("<title>Controle de Motores</title>");
-            client.println("<style>");
-            client.println("body { font-family: Arial, sans-serif; text-align: center; background-color: #f4f4f4; }");
-            client.println("button { padding: 15px 30px; margin: 20px; font-size: 18px; background-color: #4CAF50; color: white; border: none; border-radius: 5px; cursor: pointer; }");
-            client.println("button:hover { background-color: #45a049; }");
-            client.println("</style>");
-            client.println("</head>");
-            client.println("<body>");
-            client.println("<h1>Controle de Motores</h1>");
-            // Botões para ligar/desligar os motores
+            client.println("<!DOCTYPE html><html><head><title>Controle de Motores</title></head><body>");
             client.println("<button onclick=\"location.href='/motor/on'\">Ligar Motores</button>");
             client.println("<button onclick=\"location.href='/motor/off'\">Desligar Motores</button>");
-            // Exibe o status dos motores
-            client.print("<h2>Status dos Motores: ");
-            client.print(motorStatus ? "Ligados" : "Desligados");
-            client.println("</h2>");
-            client.println("</body>");
-            client.println("</html>");
+            client.println("<button onclick=\"location.href='/motor/invert'\">Inverter Rotacao</button>");
+            client.println("<h2>Status dos Motores: " + String(motorStatus ? "Ligados" : "Desligados") + "</h2>");
+            client.println("</body></html>");
             break;
           }
           currentLine = "";
@@ -111,38 +92,17 @@ void loop() {
     client.stop();
     Serial.println("Cliente desconectado");
   }
-
-  // Leitura do MPU6050 e cálculo da inclinação no eixo Z
-  int16_t ax, ay, az;
-  mpu.getAcceleration(&ax, &ay, &az);
-
-  // Converte para ângulo em graus
-  float angleZ = atan2(az, sqrt(ax * ax + ay * ay)) * 180 / PI;
-
-  // Garantir que o ângulo seja positivo (valor absoluto)
-  angleZ = fabs(angleZ);
-
-  // Leitura da temperatura do MPU6050 (em graus Celsius)
-  float temperature = mpu.getTemperature() / 340.0 + 36.53;
-
-  // Exibe o valor do ângulo Z e a temperatura no monitor serial
-  Serial.print("Ângulo no eixo Z: ");
-  Serial.println(angleZ);
-  Serial.print("Temperatura: ");
-  Serial.println(temperature);  // Temperatura em °C
-
-  delay(100);  // Atualiza a cada 100 ms
+  delay(100);
 }
 
 void motorControl(bool status) {
   motorStatus = status;
   if (status) {
     Serial.println("Motores ligados");
-
-    // Controla os motores de passo
     for (int i = 0; i < 100; i++) {
-      myStepper1.step(1);  // Gira no sentido horário
-      myStepper2.step(-1); // Gira no sentido anti-horário
+      // Controla a direção com base na variável invertDirection
+      myStepper1.step(invertDirection ? -1 : 1);  
+      myStepper2.step(invertDirection ? 1 : -1);   
       delay(10);
     }
   } else {

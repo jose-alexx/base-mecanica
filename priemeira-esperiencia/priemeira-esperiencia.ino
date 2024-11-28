@@ -56,29 +56,29 @@ class Buzzer {
     }
 
      void emitirSirene(int duracao) {
-      digitalWrite(ledAmareloPin, LOW); // Desliga o LED amarelo
+      digitalWrite(ledAmareloPin, LOW);
       unsigned long startTime = millis();
       while (millis() - startTime < duracao) {
         for (int i = 1000; i <= 4000; i += 20) {
           tone(buzzerPin, i);
-          digitalWrite(ledPin, HIGH); // Liga o LED
+          digitalWrite(ledPin, HIGH);
           delay(2);
-          digitalWrite(ledPin, LOW); // Desliga o LED
+          digitalWrite(ledPin, LOW);
         }
         for (int i = 4000; i >= 1000; i -= 20) {
           tone(buzzerPin, i);
-          digitalWrite(ledPin, HIGH); // Liga o LED
+          digitalWrite(ledPin, HIGH);
           delay(2);
-          digitalWrite(ledPin, LOW); // Desliga o LED
+          digitalWrite(ledPin, LOW);
         }
       }
-      noTone(buzzerPin); // Para o som
-      digitalWrite(ledAmareloPin, HIGH); // Liga o LED amarelo
+      noTone(buzzerPin);
+      digitalWrite(ledAmareloPin, HIGH);
     }
 
     void emitirSom(int duracao) {
-      digitalWrite(ledAmareloPin, LOW); // Desliga o LED amarelo
-      tone(buzzerPin, 1000); // Emite som a 1000 Hz
+      digitalWrite(ledAmareloPin, LOW);
+      tone(buzzerPin, 1000);
       digitalWrite(ledPin, HIGH); // Liga o LED
       delay(duracao);
       noTone(buzzerPin); // Para o som
@@ -145,6 +145,11 @@ void setup() {
   pinMode(IN2,OUTPUT);
   pinMode(IN3,OUTPUT);
   pinMode(IN4,OUTPUT);
+
+      digitalWrite(in1, LOW);
+      digitalWrite(in2, LOW);
+      digitalWrite(in3, LOW);
+      digitalWrite(in4, LOW);
 
   lcd.init();
   lcd.backlight();

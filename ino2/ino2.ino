@@ -1,50 +1,58 @@
 #include <WiFi.h>
 
 // Credenciais Wi-Fi do ponto de acesso do servidor
-const char* ssid = "ESP32_AP";         // SSID do ponto de acesso do servidor
-const char* password = "12345678";     // Senha do Wi-Fi
+const char* ssid = "ESP32_AP";         
+const char* password = "12345678";     
 
-WiFiClient client;  // Cliente WiFi
-
-const int buttonPin = 4;  // Pino do botão
+WiFiClient client;  
+const int buttonPin4 = 4;   // Pino para ligar os motores
+const int buttonPin15 = 15; // Pino para inverter a rotação
 
 void setup() {
   Serial.begin(115200);
+  pinMode(buttonPin4, INPUT_PULLUP);   // Configura o pino 4
+  pinMode(buttonPin15, INPUT_PULLUP);  // Configura o pino 15
 
-  pinMode(buttonPin, INPUT_PULLUP);  // Configura o pino do botão
-
-  // Conectar-se ao Wi-Fi (do ponto de acesso do servidor)
+  // Conectar-se ao Wi-Fi
   Serial.println("Conectando ao Wi-Fi...");
   WiFi.begin(ssid, password);
   
-  // Aguarda a conexão com o Wi-Fi
   while (WiFi.status() != WL_CONNECTED) {
     delay(1000);
     Serial.println("Conectando ao Wi-Fi...");
   }
   Serial.print("Conectado! IP: ");
-  Serial.println(WiFi.localIP());  // Exibe o IP local do cliente
+  Serial.println(WiFi.localIP());
 }
 
 void loop() {
-  if (digitalRead(buttonPin) == LOW) {  // Verifica se o botão foi pressionado
-    Serial.println("Botão pressionado!");
-
-    // Tenta se conectar ao servidor
-    if (client.connect("192.168.4.1", 80)) {  // IP do servidor (alterar conforme necessário)
-      Serial.println("Conectado ao servidor!");
-
-      // Envia o comando como uma requisição HTTP GET
+  if (digitalRead(buttonPin4) == LOW) {  // Botão no pino 4 pressionado
+    Serial.println("Botão (pino 4) pressionado: Ligar motores!");
+    if (client.connect("192.168.4.1", 80)) {
       client.println("GET /motor/on HTTP/1.1");
       client.println("Host: 192.168.4.1");
       client.println("Connection: close");
-      client.println();  // Linha em branco para finalizar a requisição
-
-      delay(500);  // Delay para garantir que o comando seja enviado
-      client.stop();  // Desconecta do servidor
+      client.println();
+      delay(500);
+      client.stop();
     } else {
       Serial.println("Falha ao conectar ao servidor");
     }
   }
-  delay(100);  // Pequeno atraso para evitar leituras rápidas demais
+
+  if (digitalRead(buttonPin15) == LOW) {  // Botão no pino 15 pressionado
+    Serial.println("Botão (pino 15) pressionado: Inverter rotação!");
+    if (client.connect("192.168.4.1", 80)) {
+      client.println("GET /motor/invert HTTP/1.1");
+      client.println("Host: 192.168.4.1");
+      client.println("Connection: close");
+      client.println();
+      delay(500);
+      client.stop();
+    } else {
+      Serial.println("Falha ao conectar ao servidor");
+    }
+  }
+
+  delay(100);
 }
